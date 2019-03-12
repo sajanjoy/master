@@ -1,0 +1,48 @@
+### Analyizing Text Data
+library(tm)
+options(header=F,stringsAsFactors = F,FileEncoding='latin1')
+
+## Read data
+text=readLines("Sample.txt")
+corpus=Corpus(VectorSource(text))
+
+## Cleanup
+corpus=tm_map(corpus,tolower)
+corpus=tm_map(corpus,removePunctuation)
+corpus=tm_map(corpus,removeNumbers)
+cleanset=tm_map(corpus,removeWords,stopwords('english'))
+cleanset=tm_map(cleanset,stripWhitespace)
+cleanset=tm_map(cleanset,removeWords,c('power','ssis')) ## Explicitly removeing some words
+cleanset=tm_map(cleanset,gsub,pattern="years",replacement="year")
+
+
+## Need for new tm 0.6.0
+##cleanset=tm_map(cleanset,PlainTextDocument)
+
+## Bulid Term Document Matrix
+dtm=TermDocumentMatrix(cleanset)
+
+## Inspect frequnt words
+findFreqTerms(dtm,lowfreq = 2)
+                       
+## Bar plot
+termFrequency=rowSums(as.matrix(dtm))
+termFrequency=subset(termFrequency,termFrequency>=3)                       
+
+library(ggplot2)                       
+barplot(termFrequency,las=2,col = rainbow(20))                       
+
+## Word cloud                       
+library(wordcloud)
+m=as.matrix(dtm)                       
+
+## Calculate the frequency of words and sort it descendingly by frequency
+wordFreq=sort(rowSums(m),decreasing = T)
+
+## Word Cloud
+set.seed(375)
+grayLevels=gray((wordFreq+10)/(max(wordFreq)+10))
+
+## With Gray levels
+wordcloud(words = names(wordFreq),rot.per=0.2,scale=c(7,0.2),freq = wordFreq,max.words=1000,min.freq = 2,
+          random.order = F,colors = brewer.pal(6,"Dark2"))
