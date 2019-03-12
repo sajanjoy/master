@@ -1,0 +1,683 @@
+
+
+#### TIme series and Forecasting Analysis 
+# Data import - 2 alternatives
+
+myts=scan()
+
+## Conversion to a time series
+mycounts=ts(myts$X2, start = 1,frequency = 12)
+
+# Alternative with myts vector
+mycounts_check=ts(myts,start = 1,frequency = 12)
+
+## Visulisation
+plot(mycounts,ylab="Customer Counts",xlab="Weeks")
+
+library(forecast)
+monthplot(mycounts,labels = 1:12,xlab="Bidialy Units")
+
+seasonplot(mycounts,season.labels = F,xlab = "")
+
+# Model forecast
+
+plot(forecast(auto.arima(mycounts)))
+
+
+### POSIXt classes in R
+
+x=as.POSIXct("2015-12-25 11:45:34") # Number of seconds
+y=as.POSIXlt("2015-12-25 11:45:34")
+x
+y
+
+unclass(x)
+unclass(y)
+
+y$zone # Extracting the elements from POSIXlt
+x$zone # Not possible since it is simply a number of seconds
+
+## Another class based on dates
+x=as.Date("2015-12-25")
+x
+class(x)
+unclass(x)
+
+46*365  # Number of days since 1970
+
+library(chron)
+x=chron("12/25/2015","23:34:09")
+x
+class(x)
+unclass(x)
+
+## Lets look on the package lubridate()
+
+library(lubridate)
+
+# Different ways to input dates
+ymd(19931123)
+
+dmy(23111993)
+
+mdy(11231993)
+
+# Lets use time and date together
+
+mytimepoint=ymd_hm("1993-11-23 11:23")
+mytimepoint
+
+# Extracting the components on it
+minute(mytimepoint)
+second(mytimepoint)
+hour(mytimepoint)
+
+## WE can even change the time values with in our object
+hour(mytimepoint)=14
+mytimepoint
+
+## Which time zones do we have available
+olson_time_zones()
+OlsonNames()
+
+# We can take a look at thr most common time zones
+# but we aware that the time zone recognition also depands on our location and machine
+
+#### Lets check which day our time point is
+wday(mytimepoint)
+
+wday(mytimepoint,label = T,abbr = F) # In details
+
+# We can calculate which time point our timepoint would be in another time zone
+with_tz(mytimepoint,tz="Europe/London")
+mytimepoint
+
+## Time intervals
+time1=ymd_hm("1993-09-23 11:23")
+time2=ymd_hm("1995-11-02 15:23")
+
+# Getting the interval
+myinterval=interval(time1,time2)
+myinterval
+class(myinterval)
+
+## Lubridate Exercise 
+
+a=ymd(c(19931123, 20100911, 19980217,19970303,19960505),tz="")
+b=hms("12:10:00","11 05 44", "09-12-22","14:15:20","06:03:30")
+f=rnorm(7:10)
+f=round(f,digits = 2)
+f
+
+# Data frame
+date_time_measurement=cbind.data.frame(date=a,time=b,measurement=f)
+date_time_measurement
+
+## Some calculations with Lubridate 
+minutes(7)
+
+# Note class period need integer full number
+minutes(2.5)
+
+# Getting the duration
+dminutes(2.5)
+
+# How to add minuts and seconds
+minutes(5) + seconds(3)
+
+# More calculations
+minutes(5) + seconds(76) 
+
+# Class duration to perform addition
+as.duration(minutes(2)+ seconds(75))
+
+# lubridate has an array of time classes, period or duration differ
+
+# Which year was a leapyear?
+leap_year(2009:2014)
+
+ymd(20140101) + years(1)
+
+ymd(20140101) + dyears(1)
+
+# Lwets do the whole thing with a leap year
+leap_year(2016)
+
+ymd(20160101) + years(1)
+
+ymd(20160101) + dyears(1)
+
+#### Excercise 2 
+x=ymd_hm("2014-04-12 23:12")
+x
+minute(x)=7    ## Changing the minute
+x
+with_tz(x,tz="Europe/London")   ## Checking the London time of the same object
+
+y=ymd_hm("2015-04-12 23:12")
+y
+
+y-x   ## Time difference
+
+### CREATING TIME SERIES FUNCTION
+##  U Standard time series function
+# Lets create a time series object class - ts
+
+## Getting data
+mydata=runif(n=50,min=10,max=45)
+mydata
+
+# ts for class time series
+# Data starts in 1956 - 4 observations/ Year(Quarterly)
+
+mytimeseries=ts(data = mydata,start = 1956,frequency = 4)
+mytimeseries
+
+## Now lets look how our data looks like
+plot(mytimeseries)
+
+# Checking the class
+class(mytimeseries)
+
+## Refimg the START argument 
+mytimeseries=ts(data = mydata,start = c(1956,3),frequency = 4)
+mytimeseries
+
+### Excercise 3
+
+x=runif(450)
+x
+x=rnorm(450)
+x
+x=cumsum(rnorm(n=450))
+x
+set.seed(110)
+
+y=ts(data = x,start = c(1914,11),frequency = 12)
+y
+plot(y)
+
+library(lattice)
+xyplot.ts(y)
+
+#### U Plots for time series data
+## Standard R Base Plots
+plot(nottem)
+
+# Plot of Components
+plot(decompose(nottem))
+
+# Directly plotting a forecast of a model
+library(forecast)
+plot(forecast(auto.arima(nottem)),h=5)    ### h=5 means forecast for the next five years
+
+
+## Random Walk
+plot.ts(cumsum(rnorm(500)))
+
+## Add-on packages for advanced plots
+library(forecast)
+library(ggplot2)
+
+## ggplot equivalent to plot
+autoplot(nottem)
+
+## ggplots work with different layers
+autoplot(nottem) + ggtitle("Autoplot of Nottemham temperature data")
+
+## Time series specif plots
+ggseasonplot(nottem)
+ggmonthplot(nottem)
+
+### Excercise 5 : Season plot
+ggseasonplot(AirPassengers)+ ggtitle("Seasonal Plot of Airpassengers Dataset")
+ggmonthplot(AirPassengers) + ggtitle("Month plot of Airpassangers Dataset")
+
+library(forecast)
+seasonplot(AirPassengers,xlab = "",col=c("blue","red"),years.label=T,
+           labelgap = 0.35,type = "l",bty="7",cex=0.75,main = "Seasonal Plot of dataset Airpassengers")
+
+
+### Inflation Data from www.statbureau.org and first and last col deleted
+
+mydata=scan()
+plot.ts(mydata)
+indianinfl=ts(mydata,start = 2008,frequency = 12)
+plot(indianinfl)
+
+
+### Working with irregular time series : Dataset - irregular_sensor
+irregular_sensor=read.csv("irregular_sensor.csv",header = F)
+
+class(irregular_sensor$V1)
+View(irregular_sensor)
+
+library(zoo) ## For general irregular time series
+library(tidyr) ## For function separate
+
+### Method 1 - Removing the time component
+irreg.split=separate(irregular_sensor,col = V1,
+                     into = c("date","time"),sep=8,remove = T)
+View(irreg.split)
+
+## Using only the date
+sensor.date=strptime(irreg.split$date,'%m/%d/%y')
+sensor.date
+
+## Creating a data frame for orientation
+irregts.df=data.frame(date=as.Date(sensor.date),measurement=irregular_sensor$V2)
+irregts.df
+
+## Getting the zoo object
+library(zoo)
+irreg.dates=zoo(irregts.df$measurement,order.by = irregts.df$date)
+irreg.dates
+
+## Regularizing with aggregate
+ag.irregtime=aggregate(irreg.dates,as.Date,mean)
+ag.irregtime
+length(ag.irregtime)
+
+## Method 2 - Date and Time component kept
+sensor.date1=strptime(irregular_sensor$V1,'%m/%d/%y %I:%M %p')
+sensor.date1
+
+## Creating the zoo object
+irreg.dates1=zoo(irregular_sensor$V2,order.by = sensor.date1)
+irreg.dates1
+plot(irreg.dates1)
+
+## Regularizing with aggregate
+ag.irregtime1=aggregate(irreg.dates1,as.Date,mean)
+ag.irregtime1
+plot(ag.irregtime1)
+
+myts=ts(ag.irregtime1)  ## Converting to time series
+plot(myts)
+
+
+### Working with missing data and outliers
+## Import ts_NAandOutliers.csv
+
+mydata=read.csv("ts_NAandOutliers.csv")
+View(mydata)
+mydata
+
+# Convert the 2nd column to a simple ts without
+myts1=ts(mydata$mydata)
+myts1
+
+## Checking the NAs and Outliers
+summary(myts1)
+plot(myts1)
+
+## Automatic detection of outliers
+library(forecast)
+myts1=tsoutliers(myts1)
+myts1
+myts1[172]
+
+## Missing data handling with zoo
+library(zoo)
+myts.NAlocf=na.locf(myts) ## Here missing data is handled by last observation carry forward function(locf())
+
+myts.NAfill=na.fill(myts,33) ## Here we implicitly putting 33 over the missing portions
+
+
+## Standard NA method in package forecast
+myts.NAinterp=na.interp(myts)
+
+## Tip: na.trim() is used to trim the missing values
+
+## Cleaning NA and outliers with tsclean()
+mytsclean=tsclean(myts)
+plot(mytsclean)
+summary(mytsclean)
+
+
+### TIME SERIES ADD-ON
+lynx
+time(lynx)
+length(lynx)
+tail(lynx) # Last 6 Observation
+mean(lynx)
+median(lynx)
+plot(lynx)
+sort(lynx)
+sort(lynx)[c(57,58)]
+quantile(lynx)
+quantile(lynx,probs = seq(0,1,length=11),type = 5)
+
+###########################################################
+
+############    SIMPLE FORECAST METHODS  ##################
+
+##########################################################
+
+set.seed(95)
+myts=ts(rnorm(200),start = 1818)
+plot(myts)
+
+library(forecast)
+meanm=meanf(myts,h=20)
+naivem=naive(myts,h=20)
+driftm=rwf(myts,h=20,drift = T)
+
+plot(meanm,plot.conf=F,main="")
+lines(naivem$mean,col=123,lwd=2)
+lines(driftm$mean,col=22,lwd=2)
+legend("topleft",lty=1,col=c(4,123,22),legend = c("Mean Method","Naive Method","Drift Method"))
+
+
+##################################################################
+##### Acuuracy and Model  Comparison  ###################
+set.seed(95)
+myts=ts(rnorm(200),start=1818)
+mytstrain=window(myts,start=1818,end=1988)
+plot(mytstrain)
+
+library(forecast)
+meanm=meanf(mytstrain,h=30)
+naivem=naive(mytstrain,h=30)
+driftm=rwf(mytstrain,h=30,drift = T)
+
+mytstest=window(myts,start=1988)
+accuracy(meanm,mytstest)
+accuracy(naivem,mytstest)
+accuracy(driftm,mytstest)
+?window
+
+var(meanm$residuals)
+mean(meanm$residuals)
+mean(naivem$residuals)
+
+naivwithoutNA=naivem$residuals
+naivwithoutNA=naivwithoutNA[2:171]
+
+var(naivwithoutNA)
+mean(naivwithoutNA)
+
+driftwithoutNA=driftm$residuals
+driftwithoutNA=driftwithoutNA[2:171]
+
+var(driftwithoutNA)
+mean(driftwithoutNA)
+
+hist(driftm$residuals)
+acf(driftwithoutNA)   ## acf() to test for autocorrelation
+
+###################################################
+
+############ STATIONARITY #####################
+
+x=rnorm(1000)  # No unot root stationarity
+library(tseries)
+adf.test(x)
+
+plot(nottem)
+plot(decompose(nottem))
+adf.test(nottem)
+
+y=diffinv(x)  # Non-Stationary
+plot(y)
+adf.test(y)
+
+############# AUTO CORRELATION ##################
+# dw test for auto correlation
+length(lynx)
+head(lynx)
+head(lynx[-1])
+head(lynx[-144])
+
+
+library(lmtest)
+dwtest(lynx[-114] ~ lynx[-1])
+
+x=rnorm(700)
+dwtest(x[-700] ~ x[-1])
+
+length(nottem)
+dwtest(nottem[-240] ~ nottem[-1])
+
+###########  acf() and pacf() #########
+
+acf(lynx,lag.max = 20)
+pacf(lynx,lag.max = 20)
+
+acf(rnorm(500),lag.max = 20)   ## For random values
+
+###########################################################################
+#########################################################################
+################# Exercise - Forecast Comparision  #####################
+
+set.seed(54)
+
+myts=ts(c(rnorm(50,34,10),rnorm(67,7,1),runif(23,3,14)))
+
+myts=log(myts)
+
+plot(myts)
+
+library(forecast)
+meanm=meanf(myts,h=10)
+naivem=naive(myts,h=10)
+driftm=rwf(myts,h=10,drift = T)
+plot(meanm,plot.conf=F,main = "")
+lines(naivem$mean,col=123,lwd=2)
+lines(driftm$mean,col=22,lwd=2)
+legend("bottomleft",lty = 1,col = c(4,123,22),legend = c("Median Method","Naive Method","Drift Method"))
+
+length(myts)
+mytstrain=window(myts,start=1,end=112)
+mytstest=window(myts,start=113)
+
+meanm=meanf(mytstrain,h=28)
+naivem=naive(mytstrain,h=28)
+driftm=rwf(mytstrain,h=28,drift = T)
+
+
+accuracy(meanm,mytstest)
+accuracy(naivem,mytstest)
+accuracy(driftm,mytstest)
+
+plot(naivem$residuals)
+mean(naivem$residuals[2:140])
+hist(naivem$residuals)
+
+shapiro.test(naivem$residuals)  ## Test for Normality
+?shapiro.test
+
+acf(naivem$residuals[2:140]) ## auto correlation
+
+var(meanm$residuals)
+mean(meanm$residuals)
+mean(naivem$residuals)
+
+naivewithoutNA=naivem$residuals
+naivewithoutNA=naivewithoutNA[2:140]
+
+var(naivewithoutNA)  
+mean(naivewithoutNA)
+
+
+driftwithoutNA=driftm$residuals
+driftwithoutNA=driftwithoutNA[2:140]
+
+var(driftwithoutNA)
+mean(driftwithoutNA)
+
+hist(driftwithoutNA)
+acf(driftwithoutNA)
+
+###################################################################
+
+###### Decomposing time Series ######################
+
+plot(nottem)
+frequency(nottem)
+length(nottem)
+decompose(nottem,type = "additive")
+plot(decompose(nottem,type = "additive"))
+
+library(ggplot2)
+autoplot(decompose(nottem,type = "additive"))
+
+# Alternatively the function stl could be used
+plot(stl(nottem,s.window = "periodic"))  # s.window is seasonal window
+
+stl(nottem,s.window = "periodic")
+
+# Seasonal adjustment
+
+mynottem=decompose(nottem,"additive")
+plot(mynottem)
+class(mynottem)
+
+## We are subtracting the sesonal element
+nottemadjusted=nottem - mynottem$seasonal
+
+# Getting a plot
+plot(nottemadjusted)
+plot(mynottem$seasonal)
+
+## stl forecast from the package forecast
+library(forecast)
+plot(stlf(nottem,method="arima"))
+
+####################################################
+
+#######  Seasonal Decomposition Exercise #########
+
+set.seed(34)
+plot(AirPassengers)
+plot(decompose(AirPassengers))
+length(AirPassengers)
+frequency(AirPassengers)
+
+mymodel1=decompose(AirPassengers,type = "additive")
+mymodel2=decompose(AirPassengers,type = "multiplicative")
+
+plot(mymodel1)
+plot(mymodel2)
+
+plot(mymodel1$trend + mymodel1$random)
+
+plot(stl(AirPassengers,s.window = "periodic"))
+autoplot(stl(AirPassengers,s.window = "periodic"))
+
+#########################################################################################
+
+############# SMOOTHING  #######################
+
+library("TTR")
+
+# in order to identify trend, we can use smoothers
+# like a simple moving average
+# n identifies the order of the SMA - u can experiment
+# with this parameter
+
+x=c(1,2,3,4,5,6,7)
+SMA(x,n=3)
+?SMA
+
+lynxsmoothed=SMA(lynx,n=9)
+lynxsmoothed
+
+# We can compare the smoothed vs original data
+plot(lynx)
+plot(lynxsmoothed)
+
+##############################################################################
+
+###############  EXPONENTIAL SMOOTHING WITH ETS ##########################
+
+##ets()
+
+library(forecast)
+
+# Using function ets()
+etsmodel=ets(nottem)
+etsmodel   
+
+# Explanation
+# ETS(A,N,A) A- Additive Error, N- No Trend, A- Additive seasonality
+# Smoothing Coefficients Alpha for the Error, Gamma for the Seasonality
+# No trend means we do not need a Beta coeffient
+# Both Alpha and Gamma values are close to 0.
+# Here "l" id the initail value of the error rate and "s" seasonal values to calculate each initial seasonal state.
+# Sigma value which is an accuracy indicator of the mode
+
+# Plotting the model VS Original
+plot(nottem,lwd=3)
+lines(etsmodel$fitted,col="red")
+
+# Plotting the forecast
+plot(forecast(etsmodel,h=12))
+
+# Changing the prediction level
+plot(forecast(etsmodel,h=12,level = 95))
+
+# Manually setting the ets model
+etsmodmult=ets(nottem,model="MZM")  # MZM is the multiplicative
+etsmodmult  # Information criteria is significatly higher than the 30 points ie the model is not better than the previous
+
+# Plot as comparision
+plot(nottem,lwd=3)
+lines(etsmodmult$fitted,col="red") #There is difference btwn the black peaks and red peaks
+
+
+##################################################################################
+
+################  ARIMA with auto.arima  ##########################
+
+plot(lynx)
+library(forecast)
+tsdisplay(lynx)  # Autoregression ?
+
+auto.arima(lynx,trace = T)
+
+## Recommented setting
+auto.arima(lynx,trace = T,stepwise = F,approximation = F)
+
+## ARIMA Models
+## ARIMA Calculations
+## AR(2)  models
+
+# AR(2)  Model
+myarima=arima(lynx,order)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
