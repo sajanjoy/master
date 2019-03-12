@@ -1,0 +1,51 @@
+####------ Market Segmentation -------####
+
+dataset=read.csv("Mall_Customers.csv")
+View(dataset)
+
+# Encoding the gender variable
+dataset$Gender = factor(dataset$Gender,levels = c('Female', 'Male'),labels = c(0, 1))
+table(dataset$Gender)
+
+markt=dataset[3:5]
+View(markt)
+### Compute distance matrix
+##Choose method ----> "Eucledian","maximum","manhattan","canberra","binary","minkowski" 
+dist=dist(markt)
+
+### Run Hierarchical
+## Choice of type---> "ward.D","ward.D2","single","complete","average","mcquitty","median","centroid" 
+
+hcWard.d=hclust((dist)*(dist),method = "ward.D")  ## In ward.D we sholud take square of the distance
+plot(hcWard.d)  # Identify the no. of clusters 
+
+### Extract cluster
+
+markt$clusterWard.d=cutree(hcWard.d,k=5)
+boxplot(markt$Age ~ markt$clusterWard.d) # Group 2 is low standard while group 4 is careful
+boxplot(markt$Annual.Income..k.. ~ markt$clusterWard.d)
+boxplot(markt$Spending.Score..1.100. ~ markt$clusterWard.d)
+
+
+# Visualising the clusters
+library(cluster)
+clusplot(markt,markt$clusterWard.d,
+         lines = 0,
+         shade = TRUE,
+         color = TRUE,
+         labels=2,
+         plotchar = FALSE,
+         span = TRUE,
+         main = paste("Clustor of Clients"),
+         xlab = "Annual Income",
+         ylab = "Spending Score")
+
+
+
+clusplot(pam(markt, 5))
+
+library(cluster)
+cl <- clara(markt[,-which(colnames("Spending.Score..1.100.") == "STATUS")],3)
+table(cl$clustering,a$STATUS)
+clusplot(cl,color=TRUE, shade=T,   lines=0)
+plot(cl)
